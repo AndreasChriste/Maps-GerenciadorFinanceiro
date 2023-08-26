@@ -1,4 +1,4 @@
-package br.com.maps.gerenciadorFinanceiro.testeApis;
+package br.com.maps.gerenciadorFinanceiro.validaApis;
 
 import java.time.LocalDate;
 
@@ -95,11 +95,12 @@ class ValidaInclusaoDeParcelasPagas {
 		});
 
 		// inclusao de pagamento que zera a divida
-//			inclusaoDeParcelasPagas.adicionarPagamentoDeParcela(2, 0, LocalDate.of(2000, 1, 13));
+//		gerenciadorFinanceiro.adicionarPagamentoDeParcela(2, 0, LocalDate.of(2000, 1, 13));
 
 		// causa erro arrumar!!!!
-		// inclusaoDeParcelasPagas.adicionarPagamentoDeParcela(2, 100037.82,
-		// LocalDate.of(2000, 1, 13));
+		
+		
+		gerenciadorFinanceiro.adicionarPagamentoDeParcela(2, 100037.82, LocalDate.of(2000, 1, 13));
 
 	}
 
