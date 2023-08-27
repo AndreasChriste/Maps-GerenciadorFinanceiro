@@ -1,4 +1,4 @@
-package br.com.maps.gerenciadorFinanceiro;
+package br.com.maps.gerenciadorFinanceiro.services.validaFormatacao;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

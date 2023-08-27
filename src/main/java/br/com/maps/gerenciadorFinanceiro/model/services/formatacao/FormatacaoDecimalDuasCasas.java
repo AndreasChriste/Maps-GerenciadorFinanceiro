@@ -1,17 +1,16 @@
 package br.com.maps.gerenciadorFinanceiro.model.services.formatacao;
 
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class FormatacaoDecimalDuasCasas {
-    public static double formataDecimalDuasCasas(double valor) {
-    	
-        BigDecimal bigDecimal = BigDecimal.valueOf(valor);
-        BigDecimal valorArredondado = bigDecimal.setScale(2, RoundingMode.DOWN);
+	public static double formataDecimalDuasCasas(double valor) {
 
-        double valorFormatadoDouble = valorArredondado.doubleValue();
+		BigDecimal bigDecimal = BigDecimal.valueOf(valor);
+		BigDecimal valorArredondado = bigDecimal.setScale(2, RoundingMode.DOWN);
 
-        return valorFormatadoDouble;
-    }
+		double valorFormatadoDouble = valorArredondado.doubleValue();
+
+		return valorFormatadoDouble;
+	}
 }

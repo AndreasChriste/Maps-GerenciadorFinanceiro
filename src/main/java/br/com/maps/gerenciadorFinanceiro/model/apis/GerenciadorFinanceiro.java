@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.maps.gerenciadorFinanceiro.exceptions.DataInvalidaException;
-import br.com.maps.gerenciadorFinanceiro.exceptions.OperacaoInvalidaException;
 import br.com.maps.gerenciadorFinanceiro.exceptions.PagamentoDuploException;
 import br.com.maps.gerenciadorFinanceiro.exceptions.PagamentoMaiorQueDevidoException;
 import br.com.maps.gerenciadorFinanceiro.exceptions.PagamentoParcelaPosteriorException;
@@ -32,8 +31,7 @@ public class GerenciadorFinanceiro {
 		this.listaDePagamentosDeParcelas = new ArrayList<>();
 	}
 
-
-	//Instrução responsável por adicionar uma dívida à lista de Dívida
+	// Instrução responsável por adicionar uma dívida à lista de Dívida
 	public boolean adicionarDivida(double principal, double taxaDeJuros, LocalDate dataDeAquisicaoDaDivida) {
 		//
 		String principalCasasDecimais = String.valueOf(principal).split("\\.")[1];
@@ -46,14 +44,11 @@ public class GerenciadorFinanceiro {
 		}
 	}
 
-
-
-
 	// Classe responsável por adicionar um pagamento de uma parcela à lista
 	// depagamentos de parcelas;
 	public boolean adicionarPagamentoDeParcela(long id_divida, double valorDoPagamento, LocalDate dataDoPagamento) {
 		String valorDoPagamentoCasasDecimais = Double.toString(valorDoPagamento).split("\\.")[1];
-		Divida divida = this.getDivida(id_divida);
+		Divida divida = service.getDivida(listaDeDividas, id_divida);
 		PagamentoDeParcela pagamentoDeParcela;
 
 		if (valorDoPagamento < 0 || valorDoPagamentoCasasDecimais.length() > 2) {
@@ -88,8 +83,6 @@ public class GerenciadorFinanceiro {
 		return true;
 	}
 
-	
-	
 	public List<VisaoDaDivida> listaVisaoDaDivida(LocalDate dataDePesquisa) {
 		// lista Utilizada para armazenar a visão de cada divida
 		List<VisaoDaDivida> listaDeVisaoDasDividas = new ArrayList<>();
@@ -138,18 +131,5 @@ public class GerenciadorFinanceiro {
 		return listaDeVisaoDasDividas;
 
 	}
-	
-	//função auxiliar dado um id referente à uma divida retorna a divida correspondente
-	private Divida getDivida(long id_divida) {
-		if (!listaDeDividas.isEmpty()) {
-			Divida divida = listaDeDividas.get((int) id_divida);
-			if (divida != null) {
-				return divida;
-			} else
-				throw new OperacaoInvalidaException("Operacao Invalida");
-		} else {
-			throw new RuntimeException("Lista de Dívidas vazia!;");
-		}
-	}
-	
+
 }
