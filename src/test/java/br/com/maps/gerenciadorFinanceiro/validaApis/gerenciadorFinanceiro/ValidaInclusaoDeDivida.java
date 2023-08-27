@@ -1,4 +1,4 @@
-package br.com.maps.gerenciadorFinanceiro.validaApis;
+package br.com.maps.gerenciadorFinanceiro.validaApis.gerenciadorFinanceiro;
 
 
 import java.time.LocalDate;
@@ -10,6 +10,7 @@ import br.com.maps.gerenciadorFinanceiro.model.apis.GerenciadorFinanceiro;
 
 class ValidaInclusaoDeDivida {
 	//inicializa as intancias de dívidas
+	
 	GerenciadorFinanceiro gerenciadorFinanceiro = new GerenciadorFinanceiro();
 	
 	
@@ -86,6 +87,5 @@ class ValidaInclusaoDeDivida {
 		Assertions.assertEquals(true,gerenciadorFinanceiro.adicionarDivida(0.0, 10, LocalDate.of(2000, 1, 1)));
 		Assertions.assertThrows(RuntimeException.class, () -> {gerenciadorFinanceiro.adicionarDivida(0.009, 10, LocalDate.of(2000, 1, 1));});
 	}
-	
 
 }

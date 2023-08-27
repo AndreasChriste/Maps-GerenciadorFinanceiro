@@ -2,19 +2,19 @@ package br.com.maps.gerenciadorFinanceiro.model.services.gerenciadorFinanceiro;
 
 import java.time.LocalDate;
 
-import br.com.maps.gerenciadorFinanceiro.exceptions.ValorPagoInvalidoException;
 import br.com.maps.gerenciadorFinanceiro.model.entities.Divida;
 import br.com.maps.gerenciadorFinanceiro.model.entities.PagamentoDeParcela;
 import br.com.maps.gerenciadorFinanceiro.model.services.formatacao.FormatacaoDecimalDuasCasas;
 
-public class ServiceGerenciadorFinanceiro {
-	public static double calculaJuros(double saldo, double taxaDeJurosDiaria) {
+public  class ServiceGerenciadorFinanceiro {
+	
+	public double calculaJuros(double saldo, double taxaDeJurosDiaria) {
 		double novoJuros = FormatacaoDecimalDuasCasas.formataDecimalDuasCasas((saldo * taxaDeJurosDiaria) - saldo);
 		return novoJuros;
 	}
 
 	// Função que abate o valor pago do juros e retorna o restante do pagamento;
-	public static double abaterOPagamentoDoJuros(double juros, double valorDoPagamento) {
+	public  double abaterOPagamentoDoJuros(double juros, double valorDoPagamento) {
 		if (valorDoPagamento >= juros) {
 			double restanteSobreOJuros = valorDoPagamento - juros;
 			return restanteSobreOJuros;
@@ -24,7 +24,7 @@ public class ServiceGerenciadorFinanceiro {
 	}
 
 	// Função que atualiza o atributo saldo. Retorna o restante do saldo;
-	public static double abaterDoSaldo(double saldo, double valorDoPagamento) {
+	public  double abaterDoSaldo(double saldo, double valorDoPagamento) {
 		double novoSaldo;
 		if (valorDoPagamento == saldo) {
 			novoSaldo = 0;
@@ -34,19 +34,57 @@ public class ServiceGerenciadorFinanceiro {
 			return novoSaldo;
 		}
 	}
+	
+	
+	// função que atualiza a dívida de acordo com os dados do pagamento da parcela
+	public void atualizaDivida(Divida divida, PagamentoDeParcela pagamentoDeParcela) {
+		LocalDate dataDoPagamentoDaParcela = pagamentoDeParcela.getParcela().getDataDoPagamento();
+		LocalDate dataDaDivida = divida.getDataDeAquisicaoDaDivida();// data de aquisição da divida
+		double taxaDeJuros = divida.getTaxaDeJuros();// taxa de juros anual da divida
+		double jurosDiario = divida.getTaxaDejurosDiario().calculaTaxaDeJurosDiario(taxaDeJuros, dataDaDivida,
+				dataDoPagamentoDaParcela);// taxa de juros diaria da divida
+		double valorDoPagamento = pagamentoDeParcela.getParcela().getValorDoPagamento();
+		double saldoAtual = divida.getSaldo();
+		double novoJuros = calculaJuros(saldoAtual, jurosDiario);
+
+		// atualiza o valor do juros
+		divida.setJuros(novoJuros);
+
+		if (valorDoPagamento >= novoJuros) {
+			divida.setJuros(0);
+			divida.setTotalDeJurosPago(divida.getTotalDeJurosPago() + novoJuros);
+			valorDoPagamento = abaterOPagamentoDoJuros(novoJuros, valorDoPagamento);
+			// do saldo a divida
+			if (valorDoPagamento == saldoAtual) {
+				divida.setSaldo(0);
+				divida.setQuitado(true);
+			} else {
+				divida.setSaldo(abaterDoSaldo(saldoAtual, valorDoPagamento));
+
+			}
+
+		} else {
+			double jurosAtualizado = novoJuros - valorDoPagamento;
+			divida.setJuros(0);
+			divida.setSaldo(saldoAtual + jurosAtualizado);
+			divida.setTotalDeJurosPago(divida.getTotalDeJurosPago() + valorDoPagamento);
+		}
+	}
+	
+	// dado uma divida e a data do pagamento calcula o valor da nova divida Obs: o
+	// valor é calculado a partir do ultimo estado da dívida;
+	public double calculaValorDaDivida(Divida divida, LocalDate dataDoPagamento) {
+		double taxaDeJurosDiario = divida.getTaxaDejurosDiario().calculaTaxaDeJurosDiario(divida.getTaxaDeJuros(),
+				divida.getDataDeAquisicaoDaDivida(), dataDoPagamento);
+		double novoJuros = calculaJuros(divida.getSaldo(), taxaDeJurosDiario);
+		return divida.getSaldo() + novoJuros;
+	}
+	
+	
 
 	// devolve o o Saldo atualizado entre o momento atual da dívida e a data do
 	// pagamento
-	public static double atualizaSaldoParaAData(Divida divida, double saldoParaAData, PagamentoDeParcela pagamento) {
-		if (divida == null) {
-			throw new RuntimeException("Divida inválida");
-		}
-		if (saldoParaAData < 0) {
-			throw new ValorPagoInvalidoException("saldo inválido");
-		}
-		if (pagamento == null) {
-			throw new RuntimeException("Pagamento inválido");
-		}
+	public  double atualizaSaldoParaAData(Divida divida, double saldoParaAData, PagamentoDeParcela pagamento) {
 		LocalDate dataDoPagamentoDaParcela = pagamento.getParcela().getDataDoPagamento();
 		LocalDate dataDaDivida = divida.getDataDeAquisicaoDaDivida();// data de aquisição da divida
 		double taxaDeJuros = divida.getTaxaDeJuros();// taxa de juros anual da divida
@@ -65,7 +103,6 @@ public class ServiceGerenciadorFinanceiro {
 				saldoAtualizadoParaData = calculaJuros(saldoParaAData, jurosDiario);
 			} else {
 				saldoAtualizadoParaData = abaterDoSaldo(saldoParaAData, valorDoPagamento);
-				;
 			}
 		} else {
 			double jurosAtualizado = novoJuros - valorDoPagamento;
@@ -77,13 +114,7 @@ public class ServiceGerenciadorFinanceiro {
 	}
 
 	// função que devolve o valor do juros dado uma data de pesquisa
-	public static double atualizaOJurosParaAData(Divida divida, double saldoParaAData, LocalDate dataDePesquisa) {
-		if (divida == null) {
-			throw new RuntimeException("Divida inválida");
-		}
-		if (saldoParaAData < 0) {
-			throw new ValorPagoInvalidoException("saldo inválido");
-		}
+	public  double atualizaOJurosParaAData(Divida divida, double saldoParaAData, LocalDate dataDePesquisa) {
 
 		LocalDate dataDaDivida = divida.getDataDeAquisicaoDaDivida();// data de aquisição da divida
 
@@ -99,16 +130,7 @@ public class ServiceGerenciadorFinanceiro {
 
 	// devolde o valor do juros pago entre o saldo atual da divida e o pagamento da
 	// parcela
-	public static double devolveJurosPago(Divida divida, double saldoParaAData, PagamentoDeParcela pagamento) {
-		if (divida == null) {
-			throw new RuntimeException("Divida inválida");
-		}
-		if (saldoParaAData < 0) {
-			throw new ValorPagoInvalidoException("saldo inválido");
-		}
-		if (pagamento == null) {
-			throw new RuntimeException("Pagamento inválido");
-		}
+	public  double devolveJurosPago(Divida divida, double saldoParaAData, PagamentoDeParcela pagamento) {
 		LocalDate dataDoPagamentoDaParcela = pagamento.getParcela().getDataDoPagamento();
 		LocalDate dataDaDivida = divida.getDataDeAquisicaoDaDivida();// data de aquisição da divida
 		double taxaDeJuros = divida.getTaxaDeJuros();// taxa de juros anual da divida
@@ -125,18 +147,13 @@ public class ServiceGerenciadorFinanceiro {
 
 	// dada uma dívida, se quitada, devolve a data de quitação,caso contrario,
 	// devolve nulo;
-	public static LocalDate confereDataDeQuitacao(Divida divida) {
-		if (divida == null) {
-			throw new RuntimeException("Divida inválida");
-		}
+	public  LocalDate confereDataDeQuitacao(Divida divida) {
 		if (divida.getQuitado()) {
 			// retorna a data da ultima parcela se estiver quitado
 			if (!divida.getConjuntoDePagamento().isEmpty()) {
 				int ultimoIndice = divida.getConjuntoDePagamento().size() - 1;
 				return divida.getConjuntoDePagamento().get(ultimoIndice).getParcela().getDataDoPagamento();
-			} else {
-				throw new RuntimeException("conjunto de pagamentos vazio");
-			}
+			} 
 		}
 		return null;
 	}
