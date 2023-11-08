@@ -1,7 +1,5 @@
 # Desafio MAPS
 
-## Candidato: Andreas Hukuhara Christe
-
 ### Descrição:
 A aplicação tem como propósito ajudar pessoas a gerirem suas dívidas, ajudando no planejamento para limpar o seu nome.
 
